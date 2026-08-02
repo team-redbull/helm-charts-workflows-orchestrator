@@ -29,8 +29,9 @@ replicas: 2
 # The SHARED workflow trigger API (workflows/api.py), run from the same image
 # as a single Deployment + Service named `workflows-orchestrator-api` that fronts
 # EVERY workflow domain and every workflow within it (a new domain adds a router
-# to workflows/api.py, not a new pod). Its URL PATHS stay domain-scoped
-# (/workflows/segment-connectivity) even though the resources are named after the
+# to workflows/api.py, not a new pod). Its URL PATHS are per WORKFLOW under a
+# domain prefix (/workflows/segment-connectivity/open-segment-rules, status on
+# /workflows/runs/{workflow_id}) even though the resources are named after the
 # orchestrator — the path is the public API and does not move.
 #
 # This is the operator's front door, not a service-to-service endpoint: nothing
