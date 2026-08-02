@@ -36,3 +36,15 @@ workflowsApi:
   enabled: true
   replicas: 2
   port: 8080
+  # OpenShift Route fronting the Service above. Needed because triggering a
+  # workflow is an operator-initiated HTTP call (and /docs is the UI for it),
+  # so the API must be reachable from outside the cluster. The API is
+  # UNAUTHENTICATED — disable this (and port-forward instead) anywhere that
+  # matters. Ignored on plain kubernetes/kind, which has no Route CRD.
+  route:
+    enabled: true
+    # Empty host = OpenShift generates one from route/namespace/cluster domain.
+    host: ""
+    tls:
+      termination: edge
+      insecureEdgeTerminationPolicy: Redirect

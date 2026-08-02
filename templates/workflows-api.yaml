@@ -55,4 +55,35 @@ spec:
     - name: http
       port: {{ .Values.workflowsApi.port }}
       targetPort: {{ .Values.workflowsApi.port }}
+{{- if .Values.workflowsApi.route.enabled }}
+---
+# OpenShift Route — the HUMAN front door. In-cluster callers use the Service
+# above; this exists because starting a workflow is now an operator-initiated
+# action (POST /workflows/<domain>), not a side effect of another service's
+# event, so the Swagger UI at /docs has to be reachable from outside.
+#
+# NOTE: workflows/api.py has no authentication of its own. Anyone who can
+# reach this hostname can start (and read the status of) a workflow. Set
+# workflowsApi.route.enabled=false in environments where that is not
+# acceptable, and reach the API via `oc port-forward` instead.
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: workflows-api
+  labels:
+    app: workflows-api
+spec:
+  {{- with .Values.workflowsApi.route.host }}
+  host: {{ . | quote }}
+  {{- end }}
+  to:
+    kind: Service
+    name: workflows-api
+  port:
+    targetPort: http
+  {{- with .Values.workflowsApi.route.tls }}
+  tls:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}
 {{- end }}
