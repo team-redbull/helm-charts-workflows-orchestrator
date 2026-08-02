@@ -2,7 +2,7 @@
 # runs on the host and is reached via host.docker.internal. For OpenShift,
 # override config.* — the image and templates stay the same.
 #
-# This chart owns `workflows-config`, the GLOBAL ConfigMap shared by every
+# This chart owns `workflows-orchestrator-config`, the GLOBAL ConfigMap shared by every
 # workflow domain: the Temporal connection plus the domain tag and Segments
 # Manager URL that all domains reuse. The brain itself only needs TEMPORAL_*;
 # domain/segmentsManagerUrl live here so activity limbs (e.g. segment-connectivity) can
@@ -27,11 +27,15 @@ image:
   pullPolicy: IfNotPresent
 replicas: 2
 # The SHARED workflow trigger API (workflows/api.py), run from the same image
-# as a single Deployment + Service named `workflows-api` that fronts EVERY
-# workflow domain (a new domain adds a route to workflows/api.py, not a new
-# pod). Callers such as the Segments Manager point their *_WORKFLOW_API_URL at
-# this Service so an event (e.g. segment creation) can start a workflow
-# in-cluster.
+# as a single Deployment + Service named `workflows-orchestrator-api` that fronts
+# EVERY workflow domain and every workflow within it (a new domain adds a router
+# to workflows/api.py, not a new pod). Its URL PATHS stay domain-scoped
+# (/workflows/segment-connectivity) even though the resources are named after the
+# orchestrator — the path is the public API and does not move.
+#
+# This is the operator's front door, not a service-to-service endpoint: nothing
+# calls in from another service any more (the Segments Manager used to, and no
+# longer does — the workflow calls IT).
 workflowsApi:
   enabled: true
   replicas: 2

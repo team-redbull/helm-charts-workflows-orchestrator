@@ -5,29 +5,29 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: workflows
+  name: workflows-orchestrator
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: workflows
+  name: workflows-orchestrator
   labels:
-    app: workflows
+    app: workflows-orchestrator
 spec:
   replicas: {{ .Values.replicas }}
   selector:
     matchLabels:
-      app: workflows
+      app: workflows-orchestrator
   template:
     metadata:
       labels:
-        app: workflows
+        app: workflows-orchestrator
     spec:
-      serviceAccountName: workflows
+      serviceAccountName: workflows-orchestrator
       containers:
-        - name: workflows
+        - name: workflows-orchestrator
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           envFrom:
             - configMapRef:
-                name: workflows-config
+                name: workflows-orchestrator-config

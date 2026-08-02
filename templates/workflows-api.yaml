@@ -9,30 +9,30 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: workflows-api
+  name: workflows-orchestrator-api
   labels:
-    app: workflows-api
+    app: workflows-orchestrator-api
 spec:
   replicas: {{ .Values.workflowsApi.replicas }}
   selector:
     matchLabels:
-      app: workflows-api
+      app: workflows-orchestrator-api
   template:
     metadata:
       labels:
-        app: workflows-api
+        app: workflows-orchestrator-api
     spec:
       # Reuses the brain's ServiceAccount — same trust boundary (Temporal client
       # only, no Segments Manager token, no next URLs).
-      serviceAccountName: workflows
+      serviceAccountName: workflows-orchestrator
       containers:
-        - name: workflows-api
+        - name: workflows-orchestrator-api
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["uvicorn", "workflows.api:app", "--host", "0.0.0.0", "--port", "{{ .Values.workflowsApi.port }}"]
           envFrom:
             - configMapRef:
-                name: workflows-config
+                name: workflows-orchestrator-config
           ports:
             - name: http
               containerPort: {{ .Values.workflowsApi.port }}
@@ -45,12 +45,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: workflows-api
+  name: workflows-orchestrator-api
   labels:
-    app: workflows-api
+    app: workflows-orchestrator-api
 spec:
   selector:
-    app: workflows-api
+    app: workflows-orchestrator-api
   ports:
     - name: http
       port: {{ .Values.workflowsApi.port }}
@@ -69,16 +69,16 @@ spec:
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: workflows-api
+  name: workflows-orchestrator-api
   labels:
-    app: workflows-api
+    app: workflows-orchestrator-api
 spec:
   {{- with .Values.workflowsApi.route.host }}
   host: {{ . | quote }}
   {{- end }}
   to:
     kind: Service
-    name: workflows-api
+    name: workflows-orchestrator-api
   port:
     targetPort: http
   {{- with .Values.workflowsApi.route.tls }}
