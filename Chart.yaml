@@ -2,5 +2,5 @@ apiVersion: v2
 name: workflows-orchestrator
 description: Temporal workflow "brain" worker — polls the workflow task queue for every workflow domain registered under workflows/. One deployment, shared across all domains (see the per-domain limb charts, e.g. helm-charts-segment-connectivity).
 type: application
-version: 0.1.5
-appVersion: "v0.1.5"
+version: 0.1.6
+appVersion: "v0.1.6"
